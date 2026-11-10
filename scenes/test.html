@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#0b1530}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="1280" height="720"></canvas>
+<script>
+const c = document.getElementById('c');
+const x = c.getContext('2d');
+const clamp = (p) => Math.max(0, Math.min(1, p));
+const ease = (p) => 1 - Math.pow(1 - clamp(p), 3);
+
+// Every frame is drawn purely from the time t (seconds), so renders are repeatable.
+window.renderAt = function (t) {
+  x.globalAlpha = 1;
+  x.fillStyle = '#0b1530';
+  x.fillRect(0, 0, 1280, 720);
+
+  x.globalAlpha = ease(t / 1.2);
+  x.fillStyle = '#ffffff';
+  x.font = 'bold 54px sans-serif';
+  x.textAlign = 'left';
+  x.fillText('How compound interest works', 80, 90);
+  x.globalAlpha = 1;
+
+  const base = 640, maxH = 420, maxVal = 2600;
+  for (let i = 0; i < 10; i++) {
+    const year = i + 1;
+    const p = ease((t - (1.5 + i * 0.7)) / 0.6);
+    if (p <= 0) continue;
+    const simple = 1000 + 100 * year;
+    const comp = 1000 * Math.pow(1.1, year);
+    const bx = 80 + i * 116;
+    const hSimple = (simple / maxVal) * maxH * p;
+    const hExtra = ((comp - simple) / maxVal) * maxH * p;
+    x.fillStyle = '#2dd4bf';
+    x.fillRect(bx, base - hSimple, 80, hSimple);
+    x.fillStyle = '#fb923c';
+    x.fillRect(bx, base - hSimple - hExtra, 80, hExtra);
+    x.fillStyle = '#cbd5e1';
+    x.font = '22px sans-serif';
+    x.textAlign = 'center';
+    x.fillText('Y' + year, bx + 40, base + 30);
+  }
+
+  x.textAlign = 'left';
+  x.font = '24px sans-serif';
+  x.fillStyle = '#2dd4bf';
+  x.fillText('Simple interest', 80, 140);
+  x.fillStyle = '#fb923c';
+  x.fillText('Extra from compounding', 300, 140);
+
+  if (t > 8.5) {
+    x.globalAlpha = ease((t - 8.5) / 0.8);
+    x.fillStyle = '#ffffff';
+    x.font = 'bold 34px sans-serif';
+    x.fillText('$1,000 at 10%: about $2,594 vs $2,000 after 10 years', 80, 200);
+    x.globalAlpha = 1;
+  }
+};
+window.renderAt(0);
+</script>
+</body>
+</html>
